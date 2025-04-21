@@ -1,0 +1,26 @@
+{
+  "manifest_version": 3,
+  "name": "Leetcode Problem Solver",
+  "version": "1.0",
+  "description": "A Chrome extension to solve Leetcode problems.",
+  "permissions": ["activeTab", "scripting", "storage"],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "action": {
+    "default_popup": "popup.html",
+    "default_icon": "images/icon.png"
+  },
+  "content_scripts": [
+    {
+      "matches": ["*://*.leetcode.com/problems/*"],
+      "js": ["content.js"]
+    }
+  ],
+
+  "options_page": "options.html",
+  "host_permissions": [
+    "*://*.leetcode.com/*",
+    "https://generativelanguage.googleapis.com/*"
+  ]
+}
