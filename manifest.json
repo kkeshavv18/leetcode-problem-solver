@@ -5,16 +5,16 @@
   "description": "A Chrome extension to solve Leetcode problems.",
   "permissions": ["activeTab", "scripting", "storage"],
   "background": {
-    "service_worker": "background.js"
+    "service_worker": "background-service-worker/background.js"
   },
   "action": {
-    "default_popup": "popup.html",
+    "default_popup": "popup/popup.html",
     "default_icon": "images/icon.png"
   },
   "content_scripts": [
     {
       "matches": ["*://*.leetcode.com/problems/*"],
-      "js": ["content.js"]
+      "js": ["content-script/content.js"]
     }
   ],
 
