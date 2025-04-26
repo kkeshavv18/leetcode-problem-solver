@@ -4,8 +4,8 @@ A Chrome extension that automatically generates solutions for LeetCode problems 
 
 ## Features
 
-- 🚀 Automatically extracts problem statements from LeetCode pages
-- 🤖 Generates JavaScript solutions using Google's Gemini AI
+- 🚀 Automatically extracts problem statements, programming language and user code from LeetCode pages
+- 🤖 Generates solutions according to user selected programming language and code template given in leetcode code editor using Google's Gemini AI
 - 📋 One-click copy of generated solutions
 - ⚙️ Simple API key configuration
 - 🔒 Secure storage of your API key
@@ -36,9 +36,7 @@ git clone https://github.com/yourusername/leetcode-problem-solver.git
 
 1. Get your Google Gemini API key from [Google AI Studio](https://aistudio.google.com/app/apikey)
 
-2. Click on the extension icon and then click on the gear icon, or right-click the extension icon and select "Options"
-
-3. Enter your API key in the field and click "Save"
+2. Enter your API key in the field and click "Save"
 
 ## Usage
 
@@ -58,25 +56,33 @@ git clone https://github.com/yourusername/leetcode-problem-solver.git
 
 The extension works through the following process:
 
-1. **Content Script**: When you're on a LeetCode problem page, a content script extracts the problem description from the page's metadata.
+1. **Content Script**: When you're on a LeetCode problem page, a content script extracts the problem description, programming language and code template from the leetcode problems page.
 
-2. **Background Service**: The background script sends the problem description to the Google Gemini API, which generates a JavaScript solution.
+2. **Background Service**: The background script sends the problem description to the Google Gemini API, which generates a solution.
 
-3. **Popup Interface**: The popup script displays the solution and provides a button to copy it to your clipboard.
+3. **Popup Interface**: The popup script provides a button to copy it to your clipboard.
 
 ## File Structure
 
 ```
 leetcode-problem-solver/
-├── manifest.json        # Extension configuration
-├── background.js        # Background service worker
-├── content.js           # Content script for LeetCode pages
-├── popup.html           # Popup interface HTML
-├── popup.js             # Popup interface logic
-├── options.html         # Options page HTML
-├── options.js           # Options page logic
-└── images/
-    └── icon.png         # Extension icon
+├── background-service-worker/
+│   └── background.js
+├── content-script/
+│   └── content.js
+├── documentation/
+│   ├── BACKGROUND.MD
+│   ├── CONTENT.MD
+│   ├── MANIFEST.MD
+│   ├── OPTIONS.MD
+│   └── POPUP.MD
+├── images/
+│   └── icon.png
+├── manifest.json
+├── README.md
+├── options.html
+├── options.css
+└── options.js
 ```
 
 ## Technical Details
@@ -112,10 +118,6 @@ Contributions are welcome! Please feel free to submit a Pull Request.
 4. Push to the branch (`git push origin feature/amazing-feature`)
 5. Open a Pull Request
 
-## License
-
-This project is licensed under the MIT License - see the LICENSE file for details.
-
 ## Acknowledgements
 
 - [Google Gemini API](https://ai.google.dev/)
@@ -124,4 +126,4 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 
 ---
 
-**Disclaimer**: This extension is meant for educational purposes and to help understand coding problems. Using automated solutions for competitive programming or interviews may violate terms of service of certain platforms.
+**Disclaimer**: This extension is meant for educational purposes and to help understand coding problems. Using automated solutions for competitive programming or interviews may violate terms of service of certain platforms. Furthermore, this extension is using gemini model 1.5, so it may not provide correct solutions for all the leetcode problems.
