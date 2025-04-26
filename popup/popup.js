@@ -35,9 +35,17 @@ document.getElementById("generateBtn").addEventListener("click", () => {
                 output.textContent = "Failed to Extract Problem Statement.";
                 return;
               }
+              const userCode = response?.userCode;
+              const programmingLanguage = response?.programmingLanguage;
 
               chrome.runtime.sendMessage(
-                { action: "GENERATE_SOLUTION", apiKey, problemStatement },
+                {
+                  action: "GENERATE_SOLUTION",
+                  apiKey,
+                  problemStatement,
+                  userCode,
+                  programmingLanguage,
+                },
                 (response) => {
                   if (response?.error) {
                     output.textContent = "Error generating solution.";
@@ -58,9 +66,8 @@ document.getElementById("generateBtn").addEventListener("click", () => {
 
 document.getElementById("copyBtn").addEventListener("click", () => {
   const output = document.getElementById("output").textContent;
-  const codeBlock = cleanCodeBlock(output);
 
-  navigator.clipboard.writeText(codeBlock).then(() => {
+  navigator.clipboard.writeText(output).then(() => {
     const copyBtn = document.getElementById("copyBtn");
     copyBtn.textContent = "Copied!";
     setTimeout(() => {
@@ -68,11 +75,3 @@ document.getElementById("copyBtn").addEventListener("click", () => {
     }, 2000);
   });
 });
-
-function cleanCodeBlock(code) {
-  return code
-    .trim()
-    .replace(/^```javascript\s*/, "") // Remove starting ```javascript
-    .replace(/```$/, "") // Remove ending ```
-    .trim();
-}
