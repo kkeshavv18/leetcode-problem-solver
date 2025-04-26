@@ -8,6 +8,8 @@ chrome.runtime.onInstalled.addListener(() => {
 
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   if (message.action === "GENERATE_SOLUTION") {
+    const geminiPrompt = `Generate the actual solution code in javascript programming language for the following LeetCode problem statement. Do not include any explanation or comments. Just provide the code.:
+                  ${problemStatement}`;
     const { apiKey, problemStatement } = message;
     const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
 
@@ -21,7 +23,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
           {
             parts: [
               {
-                text: `Give the solution in Javascript programming language. Only give the executable code without any explaination for the following problem: ${problemStatement}`,
+                text: geminiPrompt,
               },
             ],
           },
