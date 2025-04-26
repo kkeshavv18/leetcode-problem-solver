@@ -8,7 +8,12 @@ chrome.runtime.onInstalled.addListener(() => {
 
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   if (message.action === "GENERATE_SOLUTION") {
-    const { apiKey, problemStatement } = message;
+    const { apiKey, problemStatement, userCode, programmingLanguage } = message;
+
+    const geminiPrompt = `Generate the actual solution code in ${programmingLanguage} programming language for the following LeetCode problem statement. Do not include any explanation or comments. Also donot include Just provide the code.:
+    ${problemStatement} 
+    and the user code is:
+     ${userCode}.`;
     const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
 
     fetch(url, {
@@ -21,7 +26,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
           {
             parts: [
               {
-                text: `Give the solution in Javascript programming language. Only give the executable code without any explaination for the following problem: ${problemStatement}`,
+                text: geminiPrompt,
               },
             ],
           },
@@ -39,11 +44,12 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
         return res.json();
       })
       .then((data) => {
-        console.log("Response data:", data);
+        const rawResult =
+          data.candidates?.[0]?.content?.parts?.[0]?.text ||
+          "No solution found.";
+        const cleanedResult = cleanCodeBlock(rawResult, programmingLanguage);
         sendResponse({
-          result:
-            data.candidates?.[0]?.content?.parts?.[0]?.text ||
-            "No solution found.",
+          result: cleanedResult,
         });
       })
       .catch((err) => {
@@ -52,5 +58,26 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
       });
 
     return true; // Required for async sendResponse
+  }
+
+  function cleanCodeBlock(code, programmingLanguage) {
+    console.log("programmingLanguage", programmingLanguage);
+    console.log("code", code);
+
+    // First try to remove code fences with the specific language
+    let result = code
+      .trim()
+      .replace(new RegExp("^```" + programmingLanguage + "\\s*", "i"), "") // Case insensitive match
+      .replace(/```$/, "");
+
+    // If that didn't work, try to remove any language code fence
+    if (result.startsWith("```")) {
+      result = result
+        .replace(/^```[a-zA-Z]*\s*/, "") // Remove starting ```[any language]
+        .replace(/```$/, "");
+    }
+    console.log("result", result.trim());
+
+    return result.trim();
   }
 });
