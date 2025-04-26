@@ -16,34 +16,36 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
      ${userCode}.`;
     const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
 
-    fetch(url, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        contents: [
-          {
-            parts: [
+    // Using an immediately invoked async function
+    (async () => {
+      try {
+        const res = await fetch(url, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            contents: [
               {
-                text: geminiPrompt,
+                parts: [
+                  {
+                    text: geminiPrompt,
+                  },
+                ],
               },
             ],
-          },
-        ],
-        generationConfig: {
-          temperature: 0.2,
-        },
-      }),
-    })
-      .then(async (res) => {
+            generationConfig: {
+              temperature: 0.2,
+            },
+          }),
+        });
+
         if (!res.ok) {
           console.error("Error Fetching solution");
           throw new Error("Error fetching solution: ");
         }
-        return res.json();
-      })
-      .then((data) => {
+
+        const data = await res.json();
         const rawResult =
           data.candidates?.[0]?.content?.parts?.[0]?.text ||
           "No solution found.";
@@ -51,33 +53,24 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
         sendResponse({
           result: cleanedResult,
         });
-      })
-      .catch((err) => {
+      } catch (err) {
         console.error("Fetch error:", err);
         sendResponse({ error: "Fetch failed" });
-      });
+      }
+    })();
 
     return true; // Required for async sendResponse
   }
 
   function cleanCodeBlock(code, programmingLanguage) {
-    console.log("programmingLanguage", programmingLanguage);
-    console.log("code", code);
-
-    // First try to remove code fences with the specific language
     let result = code
       .trim()
-      .replace(new RegExp("^```" + programmingLanguage + "\\s*", "i"), "") // Case insensitive match
+      .replace(new RegExp("^```" + programmingLanguage + "\\s*", "i"), "")
       .replace(/```$/, "");
 
-    // If that didn't work, try to remove any language code fence
     if (result.startsWith("```")) {
-      result = result
-        .replace(/^```[a-zA-Z]*\s*/, "") // Remove starting ```[any language]
-        .replace(/```$/, "");
+      result = result.replace(/^```[a-zA-Z]*\s*/, "").replace(/```$/, "");
     }
-    console.log("result", result.trim());
-
     return result.trim();
   }
 });
