@@ -1,37 +1,46 @@
-# readme.md
+# Chrome Extension: Solution Generator
 
-## popup.js
+This project is a Chrome Extension script that:
 
-This script runs when the `popup.html` of the "Leetcode Problem Solver" Chrome extension is opened. It handles user interactions within the popup, such as clicking the "Generate Solution" and "Copy the Solution" buttons, and communicates with other parts of the extension to fetch and display the solution.
+- Injects a content script into the currently active tab.
+- Extracts a problem description, user code, and programming language from the page.
+- Sends this data to a backend service (using an API key) to generate a solution.
+- Displays the generated solution within the extension and provides an easy way to copy it.
 
-### Functionality:
+## Features
 
--   **"Generate Solution" Button Listener (`document.getElementById("generateBtn").addEventListener("click", ...)`**:
-    -   Attaches an event listener to the button with the ID `"generateBtn"`.
-    -   When clicked:
-        -   Displays a loading indicator (`#loading`) with the text "Generating the solution. Please wait...".
-        -   Retrieves the stored `apiKey` from `chrome.storage.sync`.
-        -   If the API key is not found, it displays an error message in the output area (`#output`).
-        -   If the API key is found:
-            -   Queries the currently active tab in the current window using `chrome.tabs.query`.
-            -   Sends a message to the `content.js` script running on that tab with the `action` `"GET_PROBLEM_DESCRIPTION"` to request the LeetCode problem statement.
-            -   Handles the response from `content.js`:
-                -   If the problem statement is successfully retrieved, it sends a message to the `background.js` service worker with the `action` `"GENERATE_SOLUTION"`, including the `apiKey` and the `problemStatement`.
-                -   If the problem statement retrieval fails, it displays an error message in the output area.
-            -   Handles the response from `background.js` (the generated solution or an error):
-                -   If there's an `error` in the response, it displays an error message in the output area.
-                -   If the solution is received successfully, it makes the "Copy to Clipboard" button (`#copyBtn`) visible, displays the solution in the output area, and hides the loading indicator.
--   **"Copy the Solution" Button Listener (`document.getElementById("copyBtn").addEventListener("click", ...)`**:
-    -   Attaches an event listener to the button with the ID `"copyBtn"`.
-    -   When clicked:
-        -   Gets the text content from the output area (`#output`).
-        -   Calls the `cleanCodeBlock()` function to remove any leading/trailing whitespace and Markdown code block markers.
-        -   Uses the `navigator.clipboard.writeText()` API to copy the cleaned code to the clipboard.
-        -   Provides visual feedback to the user by changing the button text to "Copied!" for a short duration.
--   **`cleanCodeBlock(code)` Function**:
-    -   Takes a string (`code`) as input.
-    -   Trims any leading or trailing whitespace from the string.
-    -   Removes any leading ````javascript` or trailing ```` markers that might be present in the Gemini API's response.
-    -   Returns the cleaned code string.
+- **Manual content script injection:** Enables functionality on dynamically loaded pages.
+- **API Key Management:** Fetches and utilizes API keys securely stored in Chrome's `storage.sync`.
+- **Inter-script Communication:** Facilitates seamless messaging between the background, content, and popup scripts.
+- **User Feedback:** Includes loading indicators to show processing and error handling for potential issues.
+- **One-Click Copy:** Allows users to quickly copy the generated solution to their clipboard with a single click.
 
-This script is the primary interface for the user to interact with the extension's core functionality of generating and copying LeetCode problem solutions.
+## How It Works
+
+### 1. Click the Generate Button
+
+When the user clicks the "Generate Solution" button in the extension's popup:
+
+- A loading message is displayed to indicate activity.
+- The script retrieves the API key from Chrome's `storage.sync`.
+- The `content.js` script is injected into the currently active tab of the browser.
+
+### 2. Extract Problem Details
+
+Once injected, the `content.js` script:
+
+- Receives a message from the popup script to initiate the extraction process.
+- Extracts the following information from the webpage:
+  - **Problem Statement:** The description of the coding problem.
+  - **User's Code:** Any code the user has already written.
+  - **Programming Language:** The language associated with the user's code or the problem.
+
+### 3. Generate Solution
+
+- The extracted problem details, along with the API key, are sent to the gemini api endpoint.
+- The gemini api processes the request and returns a generated solution.
+
+### 4. Display and Copy Solution
+
+- The generated solution received from the backend is displayed in the output field of the extension's popup but the output element is hidden.
+- A "Copy to Clipboard" button allows the user to easily copy the displayed solution.
